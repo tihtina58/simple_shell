@@ -116,3 +116,4 @@ int _atoi(char *str)
 	if (i > digits)
 		return (-1);
 	return (num);
+}
