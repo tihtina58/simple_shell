@@ -1,104 +1,72 @@
 #include "shell.h"
 
-int num_len(int num);
-char *_itoa(int num);
-int create_error(char **args, int err);
-
 /**
- * num_len - Counts the digit length of a number.
- * @num: The number to measure.
+ * print_error - prints error messages to standard error
+ * @vars: pointer to struct of variables
+ * @msg: message to print
  *
- * Return: The digit length.
+ * Return: void
  */
-int num_len(int num)
+void print_error(vars_t *vars, char *msg)
 {
-unsigned int num1;
-int len = 1;
-if (num < 0)
+char *count;
+_puts2(vars->argv[0]);
+_puts2(": ");
+count = _uitoa(vars->count);
+_puts2(count);
+free(count);
+_puts2(": ");
+_puts2(vars->av[0]);
+if (msg)
 {
-len++;
-num1 = num * -1;
+_puts2(msg);
 }
 else
-{
-num1 = num;
-}
-while (num1 > 9)
-{
-len++;
-num1 /= 10;
-}
-return (len);
+perror("");
 }
 
 /**
- * _itoa - Converts an integer to a string.
- * @num: The integer.
+ * _puts2 - prints a string to standard error
+ * @str: string to print
  *
- * Return: The converted string.
+ * Return: void
  */
-char *_itoa(int num)
+void _puts2(char *str)
 {
-char *buffer;
-int len = num_len(num);
-unsigned int num1;
-buffer = malloc(sizeof(char) * (len + 1));
-if (!buffer)
-return (NULL);
-buffer[len] = '\0';
-if (num < 0)
+ssize_t num, len;
+num = _strlen(str);
+len = write(STDERR_FILENO, str, num);
+if (len != num)
 {
-num1 = num * -1;
-buffer[0] = '-';
+perror("Fatal Error");
+exit(1);
 }
-else
-{
-num1 = num;
-}
-len--;
-do {
-buffer[len] = (num1 % 10) + '0';
-num1 /= 10;
-len--;
-} while (num1 > 0);
-return (buffer);
 }
 
 /**
- * create_error - Writes a custom error message to stderr.
- * @args: An array of arguments.
- * @err: The error value.
+ * _uitoa - converts an unsigned int to a string
+ * @count: unsigned int to convert
  *
- * Return: The error value.
+ * Return: pointer to the converted string
  */
-int create_error(char **args, int err)
+char *_uitoa(unsigned int count)
 {
-char *error;
-switch (err)
+char *numstr;
+unsigned int tmp, digits;
+tmp = count;
+for (digits = 0; tmp != 0; digits++)
+tmp /= 10;
+numstr = malloc(sizeof(char) * (digits + 1));
+if (numstr == NULL)
 {
-case -1:
-error = error_env(args);
-break;
-case 1:
-error = error_1(args);
-break;
-case 2:
-if (*(args[0]) == 'e')
-error = error_2_exit(++args);
-else if (args[0][0] == ';' || args[0][0] == '&' || args[0][0] == '|')
-error = error_2_syntax(args);
-else
-error = error_2_cd(args);
-break;
-case 126:
-error = error_126(args);
-break;
-case 127:
-error = error_127(args);
-break;
+perror("Fatal Error1");
+exit(127);
 }
-write(STDERR_FILENO, error, _strlen(error));
-if (error)
-free(error);
-return (err);
+numstr[digits] = '\0';
+for (--digits; count; --digits)
+{
+numstr[digits] = (count % 10) + '0';
+count /= 10;
+}
+return (numstr);
 }
